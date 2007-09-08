@@ -24,11 +24,32 @@
  */
 
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
 
 enum {
 	COL_TEXT,
 	N_COLUMNS
 };
+
+static void
+tree_cell_data_func (GtkTreeViewColumn* column,
+		     GtkCellRenderer  * renderer,
+		     GtkTreeModel     * model,
+		     GtkTreeIter      * iter,
+		     gpointer           data)
+{
+	gchar* text = NULL;
+
+	gtk_tree_model_get (model, iter,
+			    COL_TEXT, &text,
+			    -1);
+
+	g_object_set (renderer,
+		      "text", text,
+		      NULL);
+
+	g_free (text);
+}
 
 static GtkTreeModel*
 treemodel_new (void)
@@ -49,12 +70,25 @@ treemodel_new (void)
 static GtkWidget*
 treeview_new (void)
 {
-	GtkTreeModel* model;
-	GtkWidget* result;
+	GtkCellRenderer* renderer;
+	GtkTreeModel   * model;
+	GtkWidget      * result;
 
 	model  = treemodel_new ();
 	result = gtk_tree_view_new_with_model (model);
 	g_object_unref (model);
+
+	renderer = gtk_cell_renderer_text_new ();
+
+	g_object_set (renderer,
+		      "wrap-mode", PANGO_WRAP_WORD_CHAR,
+		      NULL);
+
+	gtk_tree_view_insert_column_with_data_func (GTK_TREE_VIEW (result), -1,
+						    _("Text Column"),
+						    renderer,
+						    tree_cell_data_func,
+						    NULL, NULL);
 
 	return result;
 }
