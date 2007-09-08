@@ -38,14 +38,30 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 		     GtkTreeIter      * iter,
 		     gpointer           data)
 {
-	gchar* text = NULL;
+	GdkRectangle  rect = {0,0,0,0};
+	gchar       * text = NULL;
 
 	gtk_tree_model_get (model, iter,
 			    COL_TEXT, &text,
 			    -1);
 
+	if (GTK_WIDGET_REALIZED (data)) {
+		GtkTreePath * path;
+		path = gtk_tree_model_get_path (model, iter);
+		gtk_tree_view_get_cell_area (data,
+					     path,
+					     column,
+					     &rect);
+		gtk_tree_path_free (path);
+
+		g_print ("%d\n", rect.width);
+	} else {
+		rect.width = 100;
+	}
+
 	g_object_set (renderer,
 		      "text", text,
+		      "wrap-width", rect.width - 6, // FIXME: Kris, what's this number? Where does it come from?
 		      NULL);
 
 	g_free (text);
@@ -67,6 +83,40 @@ treemodel_new (void)
 	return GTK_TREE_MODEL (result);
 }
 
+static void
+tree_size_request (GtkTreeView   * treeview,
+		   GtkRequisition* requisition,
+		   gpointer        data)
+{
+	GtkCellRenderer* renderer = data;
+
+	gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (treeview, 0),
+					      requisition->width - 1);
+}
+
+static gboolean
+emit_row_changed (GtkTreeModel* model,
+		  GtkTreePath * path,
+		  GtkTreeIter * iter,
+		  gpointer      unused)
+{
+	gtk_tree_model_row_changed (model, path, iter);
+	return FALSE;
+}
+
+static void
+tree_size_allocate (GtkTreeView  * treeview,
+		    GtkAllocation* requisition,
+		    gpointer       data)
+{
+	GtkCellRenderer* renderer = data;
+
+	// queue size updates for the model
+	gtk_tree_model_foreach (gtk_tree_view_get_model (treeview),
+				emit_row_changed,
+				NULL);
+}
+
 static GtkWidget*
 treeview_new (void)
 {
@@ -80,6 +130,11 @@ treeview_new (void)
 
 	renderer = gtk_cell_renderer_text_new ();
 
+	g_signal_connect       (result, "size-request",
+				G_CALLBACK (tree_size_request), renderer);
+	g_signal_connect_after (result, "size-allocate",
+				G_CALLBACK (tree_size_allocate), renderer);
+
 	g_object_set (renderer,
 		      "wrap-mode", PANGO_WRAP_WORD_CHAR,
 		      NULL);
@@ -88,7 +143,7 @@ treeview_new (void)
 						    _("Text Column"),
 						    renderer,
 						    tree_cell_data_func,
-						    NULL, NULL);
+						    result, NULL);
 
 	return result;
 }
