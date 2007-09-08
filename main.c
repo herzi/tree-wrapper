@@ -25,10 +25,22 @@
 
 #include <gtk/gtk.h>
 
+static GtkWidget*
+mainwin_new (void)
+{
+	GtkWidget* result = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	g_signal_connect_after (result, "destroy",
+				G_CALLBACK (gtk_main_quit), NULL);
+	return result;
+}
+
 int
 main (int   argc,
       char**argv)
 {
+	gtk_init (&argc, &argv);
+	gtk_widget_show (mainwin_new ());
+	gtk_main ();
 	return 0;
 }
 
