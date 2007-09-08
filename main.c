@@ -26,11 +26,33 @@
 #include <gtk/gtk.h>
 
 static GtkWidget*
+treeview_new (void)
+{
+	GtkWidget* result = gtk_tree_view_new ();
+	return result;
+}
+
+static GtkWidget*
 mainwin_new (void)
 {
 	GtkWidget* result = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	GtkWidget* scrolled;
+	GtkWidget* treeview;
+
 	g_signal_connect_after (result, "destroy",
 				G_CALLBACK (gtk_main_quit), NULL);
+
+	treeview = treeview_new ();
+	gtk_widget_show   (treeview);
+
+	scrolled = gtk_scrolled_window_new (NULL, NULL);
+	gtk_container_add (GTK_CONTAINER (scrolled),
+			   treeview);
+	gtk_widget_show   (scrolled);
+
+	gtk_container_add (GTK_CONTAINER (result),
+			   scrolled);
+
 	return result;
 }
 
