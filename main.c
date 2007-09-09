@@ -26,6 +26,8 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 
+#define MIN_WIDTH 100
+
 enum {
 	COL_TEXT,
 	N_COLUMNS
@@ -56,7 +58,7 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 
 	g_object_set (renderer,
 		      "text", text,
-		      "wrap-width", MAX (100, rect.width) - 6, // FIXME: Kris, what's this number? Where does it come from?
+		      "wrap-width", MAX (MIN_WIDTH, rect.width) - 6, // FIXME: Kris, what's this number? Where does it come from?
 		      NULL);
 
 	g_free (text);
