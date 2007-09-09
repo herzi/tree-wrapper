@@ -34,6 +34,20 @@ enum {
 };
 
 static void
+my_gtk_tree_view_get_cell_internal (GtkTreeView      * treeview,
+				    GtkTreeIter      * iter,
+				    GtkTreeViewColumn* column,
+				    GtkCellRenderer  * renderer,
+				    GdkRectangle     * rectangle)
+{
+	g_return_if_fail (GTK_IS_TREE_VIEW (treeview));
+	g_return_if_fail (iter != NULL); // FIXME: gtk_tree_model_iter_is_valid() ?
+	// FIXME: check that the column is part of the tree
+	// FIXME: check that the renderer is the only part of the column
+	g_return_if_fail (rectangle != NULL);
+}
+
+static void
 tree_cell_data_func (GtkTreeViewColumn* column,
 		     GtkCellRenderer  * renderer,
 		     GtkTreeModel     * model,
@@ -47,6 +61,12 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 			    COL_TEXT, &text,
 			    -1);
 
+	my_gtk_tree_view_get_cell_internal (data,
+					    iter,
+					    column,
+					    renderer,
+					    &rect);
+
 	if (GTK_WIDGET_REALIZED (data)) {
 		GtkTreePath * path = gtk_tree_model_get_path (model, iter);
 		gtk_tree_view_get_cell_area (data,
@@ -56,16 +76,6 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 		gtk_tree_path_free (path);
 	}
 
-	if (column == gtk_tree_view_get_expander_column (data)) {
-		gint h_space = 0;
-
-		gtk_widget_style_get (data,
-				      "horizontal-separator", &h_space,
-				      NULL);
-
-		rect.width -= h_space;
-	}
-
 	{
 		gint xpad = 0;
 
@@ -73,7 +83,7 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 			      "xpad", &xpad,
 			      NULL);
 
-		rect.width -= 2*xpad;;
+		rect.width -= 2*xpad;
 	}
 
 	g_object_set (renderer,
