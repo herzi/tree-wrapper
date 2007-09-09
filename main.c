@@ -40,7 +40,7 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 		     GtkTreeIter      * iter,
 		     gpointer           data)
 {
-	GdkRectangle  rect = {0,0,0,0};
+	GdkRectangle  rect = {0,0,MIN_WIDTH,0};
 	gchar       * text = NULL;
 
 	gtk_tree_model_get (model, iter,
@@ -56,9 +56,29 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 		gtk_tree_path_free (path);
 	}
 
+	if (column == gtk_tree_view_get_expander_column (data)) {
+		gint h_space = 0;
+
+		gtk_widget_style_get (data,
+				      "horizontal-separator", &h_space,
+				      NULL);
+
+		rect.width -= h_space;
+	}
+
+	{
+		gint xpad = 0;
+
+		g_object_get (renderer,
+			      "xpad", &xpad,
+			      NULL);
+
+		rect.width -= 2*xpad;;
+	}
+
 	g_object_set (renderer,
 		      "text", text,
-		      "wrap-width", MAX (MIN_WIDTH, rect.width) - 6, // FIXME: Kris, what's this number? Where does it come from?
+		      "wrap-width", MAX (100, rect.width),
 		      NULL);
 
 	g_free (text);
