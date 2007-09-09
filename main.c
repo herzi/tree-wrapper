@@ -78,7 +78,7 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 
 	g_object_set (renderer,
 		      "text", text,
-		      "wrap-width", MAX (100, rect.width),
+		      "wrap-width", rect.width,
 		      NULL);
 
 	g_free (text);
@@ -114,21 +114,6 @@ treemodel_new (void)
 			       -1);
 
 	return GTK_TREE_MODEL (result);
-}
-
-static void
-tree_size_request (GtkTreeView   * treeview,
-		   GtkRequisition* requisition,
-		   gpointer        data)
-{
-	GtkCellRenderer* renderer = data;
-}
-
-static void
-tree_size_allocate (GtkTreeView  * treeview,
-		    GtkAllocation* allocation,
-		    gpointer       data)
-{
 }
 
 static gboolean
@@ -171,10 +156,6 @@ treeview_new (void)
 	renderer = gtk_cell_renderer_text_new ();
 	g_object_set (renderer, "width", 20, NULL);
 
-	g_signal_connect       (result, "size-request",
-				G_CALLBACK (tree_size_request), renderer);
-	g_signal_connect       (result, "size-allocate",
-				G_CALLBACK (tree_size_allocate), renderer);
 	g_signal_connect_after (result, "size-allocate",
 				G_CALLBACK (tree_size_allocate_after), renderer);
 
