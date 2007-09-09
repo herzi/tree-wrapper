@@ -40,6 +40,9 @@ my_gtk_tree_view_get_cell_internal (GtkTreeView      * treeview,
 				    GtkCellRenderer  * renderer,
 				    GdkRectangle     * rectangle)
 {
+	gint x_pad = 0;
+	gint y_pad = 0;
+
 	g_return_if_fail (GTK_IS_TREE_VIEW (treeview));
 	g_return_if_fail (iter != NULL); // FIXME: gtk_tree_model_iter_is_valid() ?
 	// FIXME: check that the column is part of the tree
@@ -55,9 +58,21 @@ my_gtk_tree_view_get_cell_internal (GtkTreeView      * treeview,
 		gtk_tree_path_free (path);
 	} else {
 		g_object_get (renderer,
-			      "width", &rectangle->width,
+			      "height", &rectangle->height,
+			      "width",  &rectangle->width,
 			      NULL);
 	}
+
+	g_object_get (renderer,
+		      "xpad", &x_pad,
+		      "ypad", &y_pad,
+		      NULL);
+
+	rectangle->width  -= 2*x_pad;
+	rectangle->height -= 2*y_pad;
+
+	rectangle->width  = MAX (0, rectangle->width);
+	rectangle->height = MAX (0, rectangle->height);
 }
 
 static void
@@ -79,16 +94,6 @@ tree_cell_data_func (GtkTreeViewColumn* column,
 					    column,
 					    renderer,
 					    &rect);
-
-	{
-		gint xpad = 0;
-
-		g_object_get (renderer,
-			      "xpad", &xpad,
-			      NULL);
-
-		rect.width -= 2*xpad;
-	}
 
 	g_object_set (renderer,
 		      "text", text,
