@@ -109,14 +109,6 @@ tree_size_allocate (GtkTreeView  * treeview,
 		    GtkAllocation* allocation,
 		    gpointer       data)
 {
-	GtkTreeViewColumn* column = gtk_tree_view_get_column (treeview, 0);
-
-	if (column->width != allocation->width) {
-	gtk_tree_view_column_set_sizing      (gtk_tree_view_get_column (treeview, 0),
-					      GTK_TREE_VIEW_COLUMN_FIXED);
-	gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (treeview, 0),
-					      allocation->width);
-	}
 }
 
 static gboolean
@@ -157,6 +149,7 @@ treeview_new (void)
 				       TRUE);
 
 	renderer = gtk_cell_renderer_text_new ();
+	g_object_set (renderer, "width", 20, NULL);
 
 	g_signal_connect       (result, "size-request",
 				G_CALLBACK (tree_size_request), renderer);
@@ -192,6 +185,9 @@ mainwin_new (void)
 	gtk_widget_show   (treeview);
 
 	scrolled = gtk_scrolled_window_new (NULL, NULL);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled),
+					GTK_POLICY_NEVER,
+					GTK_POLICY_ALWAYS);
 	gtk_container_add (GTK_CONTAINER (scrolled),
 			   treeview);
 	gtk_widget_show   (scrolled);
