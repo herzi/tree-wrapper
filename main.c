@@ -143,7 +143,7 @@ tree_size_allocate_after (GtkTreeView  * treeview,
 }
 
 static GtkWidget*
-treevrequisitioiiew_new (void)
+treeview_new (void)
 {
 	GtkCellRenderer* renderer;
 	GtkTreeModel   * model;
@@ -153,7 +153,7 @@ treevrequisitioiiew_new (void)
 	result = gtk_tree_view_new_with_model (model);
 	g_object_unref (model);
 
-	grequisitioitk_tree_view_set_reorderable (GTK_TREE_VIEW (result),
+	gtk_tree_view_set_reorderable (GTK_TREE_VIEW (result),
 				       TRUE);
 
 	renderer = gtk_cell_renderer_text_new ();
@@ -188,7 +188,7 @@ mainwin_new (void)
 	g_signal_connect_after (result, "destroy",
 				G_CALLBACK (gtk_main_quit), NULL);
 
-	treeview = treevrequisitioiiew_new ();
+	treeview = treeview_new ();
 	gtk_widget_show   (treeview);
 
 	scrolled = gtk_scrolled_window_new (NULL, NULL);
