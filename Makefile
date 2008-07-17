@@ -5,3 +5,6 @@ demo: main.c Makefile
 
 clean:
 	rm -f demo
+
+check:
+install:
